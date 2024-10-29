@@ -1,24 +1,45 @@
-import React from 'react';
+import React, { FC } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import MyRuntimeProvider from './app/MyRuntimeProvider';
+import {
+  Thread,
+  ThreadWelcome,
+  Composer,
+  type ThreadConfig,
+  useEdgeRuntime,
+  ThreadWelcomeConfig
+} from "@assistant-ui/react";
 
 function App() {
+  // const runtime = useEdgeRuntime({
+  //   api: "/api/chat",
+  // });
+
+  const MyThread: FC<ThreadConfig> = (config) => {
+    return (
+      <Thread.Root config={config}>
+        <Thread.Viewport>
+          <ThreadWelcome />
+          <Thread.Messages />
+          <Thread.FollowupSuggestions />
+          <Thread.ViewportFooter>
+            <Thread.ScrollToBottom />
+            <Composer />
+          </Thread.ViewportFooter>
+        </Thread.Viewport>
+      </Thread.Root>
+    );
+  };
+
+  const welcome: ThreadWelcomeConfig = { message: "hi" };
+ 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="h-full">
+      <MyRuntimeProvider>
+        <MyThread welcome={welcome}/>
+      </MyRuntimeProvider>
+      
     </div>
   );
 }
