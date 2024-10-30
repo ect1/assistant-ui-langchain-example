@@ -46,4 +46,5 @@ You can learn more in the [Create React App documentation](https://facebook.gith
 To learn React, check out the [React documentation](https://reactjs.org/).
 
 ## Run example langchain server
+### `pip install -r requirements.txt`
 ### `python backend/backend.py`

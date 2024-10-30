@@ -1,0 +1,6 @@
+fastapi
+pydantic
+sse-starlette
+langchain-openai
+langserve
+langchain-core
