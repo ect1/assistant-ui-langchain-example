@@ -8,7 +8,7 @@ from langserve import APIHandler
 from langchain_core.runnables import RunnableLambda, RunnableConfig
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from sse_starlette import EventSourceResponse
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
 from langgraph.checkpoint.memory import MemorySaver
@@ -151,12 +151,16 @@ def _convert_message_langgraph(msg: Message):
 
 
 async def _get_api_handler_lg(request: Request) -> APIHandler:
-
+    config = {"configurable": {"thread_id": "42"}}
+    print(f"config {config}")
     t = RunnableLambda(_convert_message_langgraph)
+
+    print(f"graph {graph.get_state(config=config)}")
 
     rag_chain =  t | graph
   
     chain = rag_chain.with_types(input_type=Message)
+
 
     return APIHandler(chain, path="/v1")
 
@@ -168,6 +172,28 @@ async def v3_stream_test(
     # The API Handler validates the parts of the request
     # that are used by the runnnable (e.g., input, config fields)
     return await runnable.astream_events(request)
+
+def _get_role(message: any):
+
+    if isinstance(message, HumanMessage):
+        return "user"
+    elif isinstance(message, AIMessage):
+        return "assistant"
+
+@app.get("/get_history")
+async def get_history(thread_id: str):
+
+    config = {"configurable": {"thread_id": thread_id}}
+    state = graph.get_state(config=config).values
+
+    messages = []
+    
+    if "messages" in state:
+        messages = state["messages"]
+        messages = [{"role": _get_role(message), "content": message.content} for message in messages]
+
+    return {"messages": messages}
+
 
 if __name__ == "__main__":
     import uvicorn

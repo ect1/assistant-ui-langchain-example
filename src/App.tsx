@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import MyRuntimeProvider from './app/MyRuntimeProvider';
@@ -17,10 +17,12 @@ import {
 import MyRuntimeProviderLSLG from './app/MyRuntimeProviderLSLG';
 import { makeMarkdownText } from "@assistant-ui/react-markdown";
 import remarkGfm from 'remark-gfm'
+import { v4 as uuidv4 } from 'uuid';
  
 const MarkdownText = makeMarkdownText({rehypePlugins: [remarkGfm]});
 
 function App() {
+  const [chatUUID, setChatUUID] = useState(uuidv4());
 
    const MyAssistantMessage: FC = () => {
     return (
@@ -55,10 +57,11 @@ function App() {
   return (
     <div className="h-full">
       <MyRuntimeProvider>
-        <MyThread welcome={welcome1}/>
-      </MyRuntimeProvider>
-      <MyRuntimeProviderLSLG>
         <Thread assistantMessage={{ components: { Text: MarkdownText } }} welcome={welcome2}/>
+      </MyRuntimeProvider>
+      Thread id: {chatUUID}
+      <MyRuntimeProviderLSLG chatUUID={chatUUID}>
+        <MyThread welcome={welcome1}/>
       </MyRuntimeProviderLSLG>
     </div>
   );
