@@ -10,7 +10,8 @@ module.exports = {
     require("tailwindcss-animate"), // make sure to "npm install tailwindcss-animate"
     require("@assistant-ui/react/tailwindcss")({
       components: ["thread"],
-    })
+    }),
+    require("@assistant-ui/react-markdown/tailwindcss"),
   ],
 }
 

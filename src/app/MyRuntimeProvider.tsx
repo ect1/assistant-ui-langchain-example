@@ -48,25 +48,24 @@ export default function MyRuntimeProvider({
               input: input,
               chat_history: messages
             },
-            // {
-            //   version: 'v2',
-            // },
+            {
+              // version: 'v2',
+              configurable: {
+                "tread_id": 42
+              }
+            },
           );
     
-          const assistantMessage: MyMessage = {
-            role: "assistant",
-            content: "",
-          };
-
+          let assistantMessageContent = "";
           for await (const chunk of stream) {
-            assistantMessage.content += (chunk as any)['content']
-          }
-        
-          setMessages((currentConversation) => [
-            ...currentConversation,
-            assistantMessage,
-          ]);
-       
+            assistantMessageContent += (chunk as any)['content']
+
+            //modify last message
+            setMessages((currentConversation) => [
+              ...currentConversation.slice(0, -1),
+              { role: "assistant", content: assistantMessageContent }, // Set the entire message once
+            ]);
+          }       
       } catch (error) {
         console.error(error);
       } finally {

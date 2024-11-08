@@ -5,6 +5,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^0.0.68",
     "@assistant-ui/react": "^0.5.90",
+    "@assistant-ui/react-markdown": "^0.2.27",
     "@langchain/core": "^0.3.13",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -17,7 +18,9 @@
     "postcss": "^8.4.47",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^9.0.1",
     "react-scripts": "5.0.1",
+    "remark-gfm": "^4.0.0",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
