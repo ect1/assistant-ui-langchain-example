@@ -4,18 +4,33 @@ import {
   ThreadMessageLike,
   AppendMessage,
   AssistantRuntimeProvider,
+  ToolCallContentPart,
+  TextContentPart,
+  UIContentPart,
 } from "@assistant-ui/react";
 import { RemoteRunnable } from '@langchain/core/runnables/remote';
 
 type MyMessage = {
     role: "user" | "assistant";
-    content: string;
+    content: string | ( ToolCallContentPart | TextContentPart | UIContentPart)[];
+    tool?: any
 }
  
 const convertMessage = (message: MyMessage): ThreadMessageLike => {
+  let textContent = "";
+  
+  if (typeof message.content === "string") {
+    textContent = message.content;
+  } else if (Array.isArray(message.content)) {
+    return {
+      role: message.role,
+      content: [...message.content]
+    }
+  }
+
   return {
     role: message.role,
-    content: [{ type: "text", text: message.content }],
+    content: [{ type: "text", text: textContent,}],
   };
 };
  
@@ -27,7 +42,9 @@ export default function MyRuntimeProviderLSLG({
   chatUUID: string
 }>) {
   const [isRunning, setIsRunning] = useState(false);
-  const [messages, setMessages] = useState<MyMessage[]>([]);
+  const example: any[] = [];
+  // const example: any[] = [{ role: "assistant", content: [{type: "text", text: "hello"},{ type: "tool-call", toolName: "web_search", toolCallId: "web_search", args: { key: "value"}, argsText: "" }]}];
+  const [messages, setMessages] = useState<MyMessage[]>(example);
  
   const onNew = async (message: AppendMessage) => {
     if (message.content[0]?.type !== "text")
@@ -64,18 +81,41 @@ export default function MyRuntimeProviderLSLG({
           ]);
 
           let assistantMessageContent = "";
+          let tool: any = null;
+          // let i = 0;
           for await (const chunk of stream) {
+            // console.log(`@chunk ${i++}: `, chunk);
+
+            if (chunk.name === "_convert_message_langgraph") {
+              setMessages((currentConversation) => [
+                ...currentConversation.slice(0, -1),
+                { role: "assistant", content: "converting message..." },
+              ]);
+            }
+
+            if (chunk.event === "on_tool_end") {
+              tool = { type: "tool-call", toolName: "web_search", toolCallId: "web_search", args: { query: chunk.data.output.content}, argsText: "" };
+            }
+
             if (chunk.event === "on_chat_model_stream") {
               const newContent = (chunk.data.chunk as any)['content'];
               assistantMessageContent += newContent;  // Append the content in one variable
 
-              //modify last message
-              setMessages((currentConversation) => [
+              // modify last message
+              setMessages((currentConversation) => {
+                let content: any = assistantMessageContent;
+
+                if (tool) {
+                  content = [{ type: "text", text: content }, { ...tool }]
+                }
+                
+                return[
                 ...currentConversation.slice(0, -1),
-                { role: "assistant", content: assistantMessageContent }, // Set the entire message once
-              ]);
+                { role: "assistant", content: content }, // Set the entire message once
+              ]});
               }
           }
+          tool = null;
        
       } catch (error) {
         console.error(error);

@@ -18,8 +18,26 @@ import MyRuntimeProviderLSLG from './app/MyRuntimeProviderLSLG';
 import { makeMarkdownText } from "@assistant-ui/react-markdown";
 import remarkGfm from 'remark-gfm'
 import { v4 as uuidv4 } from 'uuid';
+import { makeAssistantToolUI } from "@assistant-ui/react";
  
 const MarkdownText = makeMarkdownText({rehypePlugins: [remarkGfm]});
+
+type WebSearchArgs = {
+  query: string;
+};
+ 
+type WebSearchResult = {
+  title: string;
+  description: string;
+  url: string;
+};
+ 
+export const WebSearchToolUI = makeAssistantToolUI<WebSearchArgs, WebSearchResult>({
+  toolName: "web_search",
+  render: ({ args, status }) => {
+    return <p className="bg-blue-100">{args.query}</p>;
+  },
+});
 
 function App() {
   const [chatUUID, setChatUUID] = useState(uuidv4());
@@ -34,6 +52,7 @@ function App() {
       </AssistantMessage.Root>
     );
   };
+  
 
   const MyThread: FC<ThreadConfig> = (config) => {
     return (
@@ -52,16 +71,18 @@ function App() {
   };
 
   const welcome1: ThreadWelcomeConfig = { message: "langserve example" };
-  const welcome2: ThreadWelcomeConfig = { message: "langserve with langgraph example" };
+  const welcome2: ThreadWelcomeConfig = { message: "langserve with langgraph example", suggestions: [{text: "What is the weather in sf?", prompt: "What is the weather in sf?"}]};
  
   return (
     <div className="h-full">
       <MyRuntimeProvider>
-        <Thread assistantMessage={{ components: { Text: MarkdownText } }} welcome={welcome2}/>
+        <Thread assistantMessage={{ components: { Text: MarkdownText } }} welcome={welcome1} tools={[WebSearchToolUI]}/>
+        <WebSearchToolUI />
       </MyRuntimeProvider>
       Thread id: {chatUUID}
       <MyRuntimeProviderLSLG chatUUID={chatUUID}>
-        <MyThread welcome={welcome1}/>
+        <MyThread welcome={welcome2}/>
+        <WebSearchToolUI />
       </MyRuntimeProviderLSLG>
     </div>
   );

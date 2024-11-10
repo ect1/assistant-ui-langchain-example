@@ -4,18 +4,33 @@ import {
   ThreadMessageLike,
   AppendMessage,
   AssistantRuntimeProvider,
+  ToolCallContentPart,
+  TextContentPart,
+  useExternalMessageConverter,
 } from "@assistant-ui/react";
 import { RemoteRunnable } from '@langchain/core/runnables/remote';
+import { BaseMessage } from "@langchain/core/dist/messages/base";
 
 type MyMessage = {
-    role: "user" | "assistant";
-    content: string;
+  role: "assistant" | "user" | "system";
+  content: string | ( ToolCallContentPart)[];
 }
  
 const convertMessage = (message: MyMessage): ThreadMessageLike => {
+
+  let content = "";
+  if (typeof message.content === "string") {
+    content = message.content
+  } else if (message.content[0].type === "tool-call") {
+    return {
+      role: message.role,
+      content: message.content
+    }
+  }
+
   return {
     role: message.role,
-    content: [{ type: "text", text: message.content }],
+    content: [{ type: "text", text: content }],
   };
 };
  

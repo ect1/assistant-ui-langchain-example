@@ -151,11 +151,8 @@ def _convert_message_langgraph(msg: Message):
 
 
 async def _get_api_handler_lg(request: Request) -> APIHandler:
-    config = {"configurable": {"thread_id": "42"}}
-    print(f"config {config}")
-    t = RunnableLambda(_convert_message_langgraph)
 
-    print(f"graph {graph.get_state(config=config)}")
+    t = RunnableLambda(_convert_message_langgraph)
 
     rag_chain =  t | graph
   
