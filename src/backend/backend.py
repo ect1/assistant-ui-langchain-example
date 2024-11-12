@@ -1,5 +1,5 @@
 
-from typing import Annotated, Dict, List, Tuple, Literal
+from typing import Annotated, Dict, List, Tuple, Literal, Union
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_openai import ChatOpenAI
@@ -139,7 +139,7 @@ checkpointer = MemorySaver()
 graph = workflow.compile(checkpointer=checkpointer)
 
 class Message(BaseModel):
-    chat_history: List[Dict[str, str]] = Field(
+    chat_history: List[Dict[str, Union[str, List[Dict[str, Union[str, dict]]]]]] = Field(
         ...,
         extra={"widget": {"type": "chat", "input": "question"}},
     )

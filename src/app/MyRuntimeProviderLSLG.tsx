@@ -89,7 +89,7 @@ export default function MyRuntimeProviderLSLG({
             if (chunk.name === "_convert_message_langgraph") {
               setMessages((currentConversation) => [
                 ...currentConversation.slice(0, -1),
-                { role: "assistant", content: "converting message..." },
+                { role: "assistant", content: "thinking..." },
               ]);
             }
 
